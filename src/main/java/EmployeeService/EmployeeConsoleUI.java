@@ -76,6 +76,7 @@ public class EmployeeConsoleUI {
 
         System.out.print("Введите год приема на работу: ");
         int employmentYear = _scanner.nextInt();
+        _scanner.nextLine();
 
         _employeeService.addEmployee(new Employee(fullName, birthDate, maritalStatus, position, employmentYear));
 
@@ -96,6 +97,7 @@ public class EmployeeConsoleUI {
     private void updateEmployee() throws IOException, NotFoundEmployeeException, DuplicateEmployeeException {
         System.out.print("Введите ID сотрудника для изменения: ");
         int id = _scanner.nextInt();
+        _scanner.nextLine();
 
         printSelectField();
         String fieldChoice = _scanner.nextLine();
