@@ -1,5 +1,7 @@
 package EmployeeService;
 
+import java.nio.file.*;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -102,19 +104,16 @@ public class EmployeeService {
     }
 
     private List<Employee> loadFromFile() throws IOException {
-        File file = new File(_filePath);
+        Path path = Paths.get(_filePath);
 
-        if (!file.exists()) {
-            if (!file.createNewFile())
-                return new ArrayList<>();
-
-            try (Writer writer = new FileWriter(file)) {
-                writer.write("[]");
-            }
+        if (Files.notExists(path)) {
+            Files.createFile(path);
+            Files.write(path, "[]".getBytes(StandardCharsets.UTF_8));
             return new ArrayList<>();
         }
 
-        try (Reader reader = new FileReader(file)) {
+        try (InputStream in = Files.newInputStream(path);
+             Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create();
             List<Employee> list = gson.fromJson(reader, new TypeToken<List<Employee>>() {}.getType());
@@ -122,12 +121,17 @@ public class EmployeeService {
             if (!list.isEmpty()) {
                 Employee._nextId = list.getLast().getId() + 1;
             }
+
             return list;
         }
     }
 
     private void saveToFile() throws IOException {
-        try (Writer writer = new FileWriter(_filePath)) {
+        Path path = Paths.get(_filePath);
+
+        try (OutputStream out = Files.newOutputStream(path);
+             Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+
             Gson gson = new GsonBuilder().setPrettyPrinting()
                     .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create();
             gson.toJson(_employeesList, writer);
